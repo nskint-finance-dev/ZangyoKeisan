@@ -13,15 +13,18 @@ namespace ZangyoKeisan.Models
 {
     public class MospClient : NotificationObject
     {
+        /// <summary>
+        /// MOSPログインURL
+        /// </summary>
+        const string MOSP_URL = "https://www.nskint.co.jp/kintai/srv/";
+
         /*
          * NotificationObjectはプロパティ変更通知の仕組みを実装したオブジェクトです。
          */
-         public async Task<string> downloadExcel()
+        public async Task<string> downloadExcel(string id ,string password)
         {
             
             var cookieContainer = new CookieContainer();
-
-            string mospURL = "https://www.nskint.co.jp/kintai/srv/";
 
             var handler = new HttpClientHandler()
             {
@@ -37,14 +40,14 @@ namespace ZangyoKeisan.Models
 
             var idPassword = new FormUrlEncodedContent(new Dictionary<string, string>
             {
-                {"txtUserId", ""},           // ID
-                {"txtPassWord", ""},        // パスワード
+                {"txtUserId", id},           // ID
+                {"txtPassWord", password},   // パスワード
                 // 以下2行はログイン処理に必要な記述（実際にPOSTされた値を見ただけなので、内容は不明）
                 {"cmd", "PF0020"},
                 {"procSeq", "2" }
             });
 
-            response = await client.PostAsync(mospURL, idPassword);
+            response = await client.PostAsync(MOSP_URL, idPassword);
             
             var kintaiList = new FormUrlEncodedContent(new Dictionary<string, string>
             {
@@ -61,7 +64,7 @@ namespace ZangyoKeisan.Models
 
             //cookieContainer.Add(new Uri(mospURL), sessioncookie);
 
-            var kintaiListRes = await client.PostAsync(mospURL, kintaiList);
+            var kintaiListRes = await client.PostAsync(MOSP_URL, kintaiList);
 
             var excelDownload = new FormUrlEncodedContent(new Dictionary<string, string>
             {
@@ -72,7 +75,7 @@ namespace ZangyoKeisan.Models
             });
 
 
-            var fileDownload = await client.PostAsync(mospURL, excelDownload);
+            var fileDownload = await client.PostAsync(MOSP_URL, excelDownload);
             var fileStream = File.Create(Path.GetTempPath() + "text.xls");
             var httpStream = await fileDownload.Content.ReadAsStreamAsync();
             await httpStream.CopyToAsync(fileStream);

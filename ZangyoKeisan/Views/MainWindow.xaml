@@ -70,6 +70,7 @@
                     <Label Content="勤怠簿読み込み" VerticalAlignment="Center" FontSize="14" />
                 </StackPanel>
             </Button>
+        <Button Content="ダウンロード" Grid.Row="1" Grid.Column="1" Width="100" Height="30" HorizontalAlignment="Left" Click="DownloadButton_Click" />
         <!-- 残業時間一覧 -->
         <ListBox ItemsSource="{Binding KintaiList}" VerticalContentAlignment="Stretch" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
             <ListBox.ItemTemplate>
