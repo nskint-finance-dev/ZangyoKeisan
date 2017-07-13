@@ -60,12 +60,38 @@ namespace ZangyoKeisan.ViewModels
          */
 
         MospClient mospClient;
+        PropertyChangedEventListener statusListener;
 
         public void Initialize()
         {
             mospClient = new MospClient();
-            Id = "test";
-            Password = "Pass";
+            statusListener = new PropertyChangedEventListener(mospClient);
+            statusListener.RegisterHandler(() => mospClient.DownloadStatus, (s, e) =>
+            {
+                DownloadStatus = mospClient.DownloadStatus;
+            });
+
+            TargetYears = new ObservableSynchronizedCollection<string>()
+            {
+                "2015",
+                "2016",
+                "2017"
+            };
+
+            TargetMonthes = new ObservableSynchronizedCollection<string>()
+            {
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10",
+                "12"
+            };
         }
 
 
@@ -89,13 +115,18 @@ namespace ZangyoKeisan.ViewModels
 
         public bool CanDownload()
         {
-            return true;
+            if (Id != "")
+            {
+                return true;
+            }
+
+            return false;
         }
 
         public async void Download(string parameter)
         {
             Console.WriteLine("Downloadボタンが押下されました");
-            await mospClient.downloadExcel(Id, Password);
+            await mospClient.downloadExcel(Id, Password, SelectedYear, SelectedMonth);
         }
         #endregion
 
@@ -135,6 +166,100 @@ namespace ZangyoKeisan.ViewModels
             }
         }
         #endregion
+
+
+        #region DownloadStatus変更通知プロパティ
+        private string _DownloadStatus;
+
+        public string DownloadStatus
+        {
+            get
+            { return _DownloadStatus; }
+            set
+            { 
+                if (_DownloadStatus == value)
+                    return;
+                _DownloadStatus = value;
+                RaisePropertyChanged();
+            }
+        }
+        #endregion
+
+
+
+        #region TargetYearsList変更通知プロパティ
+        private ObservableSynchronizedCollection<string> _TargetYearsList;
+
+        public ObservableSynchronizedCollection<string> TargetYears
+        {
+            get
+            { return _TargetYearsList; }
+            set
+            { 
+                if (_TargetYearsList == value)
+                    return;
+                _TargetYearsList = value;
+                RaisePropertyChanged();
+            }
+        }
+        #endregion
+
+
+        #region SelectedYear変更通知プロパティ
+        private string _SelectedYear;
+
+        public string SelectedYear
+        {
+            get
+            { return _SelectedYear; }
+            set
+            { 
+                if (_SelectedYear == value)
+                    return;
+                _SelectedYear = value;
+                Console.WriteLine(value + "年が選択されました");
+                RaisePropertyChanged();
+            }
+        }
+        #endregion
+
+
+        #region TargetMonthes変更通知プロパティ
+        private ObservableSynchronizedCollection<string> _TargetMonthes;
+
+        public ObservableSynchronizedCollection<string> TargetMonthes
+        {
+            get
+            { return _TargetMonthes; }
+            set
+            { 
+                if (_TargetMonthes == value)
+                    return;
+                _TargetMonthes = value;
+                RaisePropertyChanged();
+            }
+        }
+        #endregion
+
+
+        #region SelectedMonth変更通知プロパティ
+        private string _SelectedMonth;
+
+        public string SelectedMonth
+        {
+            get
+            { return _SelectedMonth; }
+            set
+            { 
+                if (_SelectedMonth == value)
+                    return;
+                _SelectedMonth = value;
+                RaisePropertyChanged();
+            }
+        }
+        #endregion
+
+
 
 
 

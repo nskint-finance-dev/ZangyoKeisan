@@ -8,6 +8,7 @@ using Livet;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Net;
+using System.Text.RegularExpressions;
 
 namespace ZangyoKeisan.Models
 {
@@ -18,10 +19,39 @@ namespace ZangyoKeisan.Models
         /// </summary>
         const string MOSP_URL = "https://www.nskint.co.jp/kintai/srv/";
 
+        /// <summary>
+        /// Excel勤怠簿ダウンロード先フォルダパス
+        /// </summary>
+        readonly string DOWNLOAD_FOLDER_PATH = Path.GetTempPath();
+
+        /// <summary>
+        /// Mospで、ログインするためにPOSTする値
+        /// </summary>
+        const string MOSP_CMD_LOGIN = "PF0020";
+
+
+        #region DownloadStatus変更通知プロパティ
+        private string _DownloadStatus;
+
+        public string DownloadStatus
+        {
+            get
+            { return _DownloadStatus; }
+            set
+            { 
+                if (_DownloadStatus == value)
+                    return;
+                _DownloadStatus = value;
+                RaisePropertyChanged();
+            }
+        }
+        #endregion
+
+
         /*
          * NotificationObjectはプロパティ変更通知の仕組みを実装したオブジェクトです。
          */
-        public async Task<string> downloadExcel(string id ,string password)
+        public async Task<string> downloadExcel(string id ,string password, string year, string month)
         {
             
             var cookieContainer = new CookieContainer();
@@ -43,16 +73,21 @@ namespace ZangyoKeisan.Models
                 {"txtUserId", id},           // ID
                 {"txtPassWord", password},   // パスワード
                 // 以下2行はログイン処理に必要な記述（実際にPOSTされた値を見ただけなので、内容は不明）
-                {"cmd", "PF0020"},
+                {"cmd", MOSP_CMD_LOGIN},
                 {"procSeq", "2" }
             });
 
             response = await client.PostAsync(MOSP_URL, idPassword);
-            
+
+            DownloadStatus = "ログインしました";
+
+            string res = await response.Content.ReadAsStringAsync();
+            string procSeq = getProcSeq(res);
+
             var kintaiList = new FormUrlEncodedContent(new Dictionary<string, string>
             {
                 {"cmd", "TM1100" },
-                {"procSeq", "0" },
+                {"procSeq", procSeq },
                 {"transferredMenuKey", "AttendanceList"}
             });
             var cookie = response.Headers.GetValues("Set-Cookie").First().Replace("JSESSIONID=", "").Replace("; Path=/kintai; Secure", "");
@@ -66,23 +101,50 @@ namespace ZangyoKeisan.Models
 
             var kintaiListRes = await client.PostAsync(MOSP_URL, kintaiList);
 
-            var excelDownload = new FormUrlEncodedContent(new Dictionary<string, string>
+            res = await kintaiListRes.Content.ReadAsStringAsync();
+            procSeq = getProcSeq(res);
+
+            var pageMoveParam = new FormUrlEncodedContent(new Dictionary<string, string>
             {
-                {"pltSelectYear", "2017"},
-                {"pltSelectMonth", "5"},
-                {"cmd",  "TM1151"},
-                {"procSeq", "1" }
+                {"pltSelectYear", year},
+                {"pltSelectMonth", month},
+                { "cmd", "TM1102" },
+                {"procSeq", procSeq }
             });
 
+            kintaiListRes = await client.PostAsync(MOSP_URL, pageMoveParam);
+
+            res = await kintaiListRes.Content.ReadAsStringAsync();
+            procSeq = getProcSeq(res);
+
+            var excelDownload = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                {"pltSelectYear", year},
+                {"pltSelectMonth", month},
+                {"cmd",  "TM1151"},
+                {"procSeq", procSeq }
+            });
+
+            DownloadStatus = "ダウンロード中...";
 
             var fileDownload = await client.PostAsync(MOSP_URL, excelDownload);
-            var fileStream = File.Create(Path.GetTempPath() + "text.xls");
+            var fileStream = File.Create(DOWNLOAD_FOLDER_PATH + "text.xls");
             var httpStream = await fileDownload.Content.ReadAsStreamAsync();
             await httpStream.CopyToAsync(fileStream);
             fileStream.Flush();
 
+            DownloadStatus = "ダウンロードが完了しました";
+
             string result = await response.Content.ReadAsStringAsync();
             return result;
+        }
+
+        private string getProcSeq(string html)
+        {
+            Regex regex = new System.Text.RegularExpressions.Regex("var procSeq = \"(?<procSeqNum>.*)\";");
+            Match match = regex.Match(html);
+
+            return match.Groups["procSeqNum"].Value;
         }
     }
 }
