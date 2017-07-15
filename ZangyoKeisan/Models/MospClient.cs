@@ -139,12 +139,24 @@ namespace ZangyoKeisan.Models
             return result;
         }
 
+        /// <summary>
+        /// "procSeq"（MospにパラメータをPOSTする際に必要となる）をHTMLから探して返す
+        /// </summary>
+        /// <param name="html">Mospから取得したHTML</param>
+        /// <returns>procSeqの値</returns>
         private string getProcSeq(string html)
         {
-            Regex regex = new System.Text.RegularExpressions.Regex("var procSeq = \"(?<procSeqNum>.*)\";");
+            string procSeq = "";
+
+            Regex regex = new Regex("var procSeq = \"(?<procSeqNum>.*)\";");
             Match match = regex.Match(html);
 
-            return match.Groups["procSeqNum"].Value;
+            if (match.Success == true)
+            {
+                procSeq = match.Groups["procSeqNum"].Value;
+            }
+
+            return procSeq;
         }
     }
 }
