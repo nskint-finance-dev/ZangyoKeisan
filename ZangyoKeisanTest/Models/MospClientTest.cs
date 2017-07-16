@@ -2,24 +2,44 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using ZangyoKeisan.Models;
-
+using RichardSzalay.MockHttp;
+using System.Net.Http;
 
 namespace ZangyoKeisanTest.Models
 {
     class MospClientTest
     {
         [Test]
-        public async Task 勤怠簿ダウンロード()
+        public void procSeq取得()
         {
-            var model = new MospClient();
-            string res = await model.downloadExcel();
+            // Mospから取得したHTML
+            string html = "<script>var procSeq = \"9\";</script>";
 
-            Console.WriteLine(res);
+            // private メソッドをテストする
+            MospClient mospClient = new MospClient();
+            Type type = mospClient.GetType();
+            MethodInfo oMethod = type.GetMethod("getProcSeq", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            string result =  (string)oMethod.Invoke(mospClient, new object[] { html });
 
-            Assert.That(res, Is.EqualTo("test"));
+            Assert.That("9", Is.EqualTo(result));
+        }
+
+        [Test]
+        public void procSeq取得_失敗()
+        {
+            // Mospから取得したHTML
+            string html = "<script>test</script>";
+
+            MospClient mospClient = new MospClient();
+            Type type = mospClient.GetType();
+            MethodInfo oMethod = type.GetMethod("getProcSeq", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            string result = (string)oMethod.Invoke(mospClient, new object[] { html });
+
+            Assert.That("", Is.EqualTo(result));
         }
     }
 }

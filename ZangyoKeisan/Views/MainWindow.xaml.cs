@@ -43,6 +43,12 @@ namespace ZangyoKeisan.Views
             HelpWindow helpWindow = new HelpWindow();
             helpWindow.ShowDialog();
         }
+
+        private void DownloadButton_Click(object sender, RoutedEventArgs e)
+        {
+            DownloadWindow downloadWindow = new Views.DownloadWindow();
+            downloadWindow.ShowDialog();
+        }
     }
 
     /// <summary>

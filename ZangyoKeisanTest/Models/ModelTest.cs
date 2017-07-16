@@ -21,7 +21,7 @@ namespace ZangyoKeisanTest
         [SetUp]
         public void setUp()
         {
-            model = new Model();
+            model = Model.GetInstance();
         }
 
         #region parseNumbertoAlphabet テスト
@@ -72,7 +72,7 @@ namespace ZangyoKeisanTest
         [SetUp]
         public void setUp()
         {
-            model = new Model();
+            model = Model.GetInstance();
         }
 
         #region calclateZangyo

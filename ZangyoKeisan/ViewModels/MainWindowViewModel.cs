@@ -66,7 +66,7 @@ namespace ZangyoKeisan.ViewModels
 
         public void Initialize()
         {
-            model = new Model();
+            model = Model.GetInstance();
             listener = new CollectionChangedEventListener(model.KintaiList);
             listener.RegisterHandler((s, e) =>
             {
@@ -112,15 +112,19 @@ namespace ZangyoKeisan.ViewModels
         /// </summary>
         public void LoadExcel()
         {
-            var dialog = new OpenFileDialog();
-            dialog.Title = "Excelファイルを開く";
-            dialog.Filter = "Excelファイル(*.xls, *.xlsx)|*.xls;*.xlsx";
-            if (dialog.ShowDialog() == true)
-            {
-                model.loadKintaiFromExcel(dialog.FileName);
-            }
+                var dialog = new OpenFileDialog();
+                dialog.Title = "Excelファイルを開く";
+                dialog.Filter = "Excelファイル(*.xls, *.xlsx)|*.xls;*.xlsx";
+                if (dialog.ShowDialog() == true)
+                {
+                    model.loadKintaiFromExcel(dialog.FileName);
+                }
         }
         #endregion
 
+        public void LoadExcel(string kintaiboPath)
+        {
+            model.loadKintaiFromExcel(kintaiboPath);
+        }
     }
 }
