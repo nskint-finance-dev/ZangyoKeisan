@@ -15,11 +15,6 @@ namespace ZangyoKeisan.Models
 {
     public class MospClient : NotificationObject
     {
-        /*
-         * NotificationObjectはプロパティ変更通知の仕組みを実装したオブジェクトです。
-         */
-         public async Task<string> downloadExcel()
-
         /// <summary>
         /// MOSPログインURL
         /// </summary>
