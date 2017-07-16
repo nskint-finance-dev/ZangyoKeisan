@@ -15,7 +15,7 @@ using System.Windows.Shapes;
 
 namespace ZangyoKeisan.Views
 {
-    /* 
+    /*
 	 * ViewModelからの変更通知などの各種イベントを受け取る場合は、PropertyChangedWeakEventListenerや
      * CollectionChangedWeakEventListenerを使うと便利です。独自イベントの場合はLivetWeakEventListenerが使用できます。
      * クローズ時などに、LivetCompositeDisposableに格納した各種イベントリスナをDisposeする事でイベントハンドラの開放が容易に行えます。
@@ -42,6 +42,12 @@ namespace ZangyoKeisan.Views
         {
             HelpWindow helpWindow = new HelpWindow();
             helpWindow.ShowDialog();
+        }
+
+        private void DownloadButton_Click(object sender, RoutedEventArgs e)
+        {
+            DownloadWindow downloadWindow = new Views.DownloadWindow();
+            downloadWindow.ShowDialog();
         }
     }
 

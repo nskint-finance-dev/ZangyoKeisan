@@ -21,7 +21,7 @@ namespace ZangyoKeisanTest
         [SetUp]
         public void setUp()
         {
-            model = new Model();
+            model = Model.GetInstance();
         }
 
         #region parseNumbertoAlphabet テスト
@@ -72,7 +72,7 @@ namespace ZangyoKeisanTest
         [SetUp]
         public void setUp()
         {
-            model = new Model();
+            model = Model.GetInstance();
         }
 
         #region calclateZangyo
@@ -82,7 +82,7 @@ namespace ZangyoKeisanTest
         static IEnumerable<TestCaseData> calclateZangyoTestDataProvider
         {
             get {
-                
+
                 List<KintaiTestData> calclateZangyoTestDataList = calclateZangyoTestData;
 
                 foreach(var calclateZangyoTestDataSet in calclateZangyoTestDataList)
@@ -109,7 +109,7 @@ namespace ZangyoKeisanTest
         /// テストデータリスト
         /// </summary>
         static List<KintaiTestData> calclateZangyoTestData = new List<KintaiTestData>() {
-            new KintaiTestData( 
+            new KintaiTestData(
                 "１日分（平日・残業あり）",
                 new List<Kintai1dayTestData>() {
                     new Kintai1dayTestData( new DateTime(2017, 4, 1), "勤務先", new TimeSpan(9, 0, 0) )
@@ -284,7 +284,7 @@ namespace ZangyoKeisanTest
         {
             Type type = model.GetType();
             MethodInfo oMethod = type.GetMethod("calclateZangyo", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            return oMethod.Invoke(model, new object[] { kintai });            
+            return oMethod.Invoke(model, new object[] { kintai });
         }
 
         #endregion calclateZangyo
@@ -293,7 +293,7 @@ namespace ZangyoKeisanTest
         public void Excel読み込み()
         {
             Kintai kintai = new Kintai();
-            
+
             // Excelをオブジェクトに変換した結果（期待値）
             // （各日のデータを書く際はExcelファイルにあるコピペ用コードを使うとよい）
             List<Kintai1dayTestData> resultExcelData = new List<Kintai1dayTestData>{
@@ -520,5 +520,5 @@ namespace ZangyoKeisanTest
         }
     }
 
-    
+
 }
