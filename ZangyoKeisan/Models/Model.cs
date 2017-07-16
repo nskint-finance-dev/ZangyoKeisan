@@ -7,6 +7,7 @@ using Livet;
 using NPOI.SS.UserModel;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace ZangyoKeisan.Models
 {
@@ -33,9 +34,45 @@ namespace ZangyoKeisan.Models
         }
         #endregion
 
-        public Model()
+
+        #region DownloadStatus変更通知プロパティ
+        private string _DownloadStatus;
+
+        public string DownloadStatus
+        {
+            get
+            { return _DownloadStatus; }
+            set
+            { 
+                if (_DownloadStatus == value)
+                    return;
+                _DownloadStatus = value;
+                RaisePropertyChanged();
+            }
+        }
+        #endregion
+
+
+        MospClient mospClient;
+
+        private static Model _singleInstance = new Model();
+
+        public static Model GetInstance()
+        {
+            return _singleInstance;
+        }
+
+        private Progress<ProgressInfo> _Progress;
+
+        private Model()
         {
             KintaiList = new ObservableSynchronizedCollection<Kintai>();
+            mospClient = new MospClient();
+
+            _Progress = new Progress<ProgressInfo>(e =>
+            {
+                DownloadStatus = e.Message;
+            });
         }
 
         /// <summary>
@@ -477,6 +514,20 @@ namespace ZangyoKeisan.Models
         {
             return TimeSpan.Parse(Math.Truncate(num) + ":" + Math.Round(num % 1 * 60, MidpointRounding.AwayFromZero));
         }
+
+        public async Task<string> downloadExcel(string id, string password, string year, string month)
+        {
+            mospClient = new MospClient();
+            string kintaiboFilePath = await mospClient.downloadExcel(_Progress, id, password, new DateTime(int.Parse(year), int.Parse(month), 1));
+
+            if (kintaiboFilePath != "")
+            {
+                this.loadKintaiFromExcel(kintaiboFilePath);
+            }
+            
+            return kintaiboFilePath;
+        }
+
     }
 
     /// <summary>

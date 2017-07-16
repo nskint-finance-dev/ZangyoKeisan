@@ -33,7 +33,7 @@ namespace ZangyoKeisan
             }
         
             MessageBox.Show(
-                "エラーが発生したため、プログラムを終了します。申し訳ございません。\n\nエラーが発生した状況とログを報告して頂けると幸いです。\n" + System.AppDomain.CurrentDomain.BaseDirectory + "\\" + logFileName,
+                "エラーが発生したため、プログラムを終了します。\n\nエラーが発生した状況とログを報告して頂けると幸いです。\n" + System.AppDomain.CurrentDomain.BaseDirectory + "\\" + logFileName,
                 "エラー",
                MessageBoxButton.OK,
                 MessageBoxImage.Error);

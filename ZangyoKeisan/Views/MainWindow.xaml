@@ -39,6 +39,7 @@
             <BitmapImage x:Key="ExcelIcon" UriSource="/Images/Excel.png" DecodePixelHeight="25" DecodePixelWidth="25" />
             <BitmapImage x:Key="UserIcon" UriSource="/Images/User.png" DecodePixelHeight="30" DecodePixelWidth="30" />
             <BitmapImage x:Key="WarnIcon" UriSource="/Images/warning.png" DecodePixelHeight="20" DecodePixelWidth="20" />
+            <BitmapImage x:Key="DownloadIcon" UriSource="/Images/Download.png" DecodePixelHeight="25" DecodePixelWidth="25" />
             <v:ZangyoHourConverter x:Key="ZangyoHourConverter" />
             <v:ZangyoMinuteConverter x:Key="ZangyoMinuteConverter" />
             <v:ZangyoAlertConverter x:Key="ZangyoAlertConverter" />
@@ -53,7 +54,7 @@
             <RowDefinition />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition />
+            <ColumnDefinition Width="200" />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <!--　メニューバー　-->
@@ -70,7 +71,12 @@
                     <Label Content="勤怠簿読み込み" VerticalAlignment="Center" FontSize="14" />
                 </StackPanel>
             </Button>
-        <Button Content="ダウンロード" Grid.Row="1" Grid.Column="1" Width="100" Height="30" HorizontalAlignment="Left" Click="DownloadButton_Click" />
+        <Button Grid.Row="1" Grid.Column="1" Height="40" Width="110" HorizontalAlignment="Left" Click="DownloadButton_Click" Margin="30, 0, 0, 0">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="{StaticResource DownloadIcon}" VerticalAlignment="Center" Height="25" Width="25" />
+                <Label Content="ダウンロード" VerticalAlignment="Center" FontSize="14" />
+            </StackPanel>
+        </Button>
         <!-- 残業時間一覧 -->
         <ListBox ItemsSource="{Binding KintaiList}" VerticalContentAlignment="Stretch" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
             <ListBox.ItemTemplate>

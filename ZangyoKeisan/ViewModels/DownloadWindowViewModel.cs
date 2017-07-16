@@ -13,6 +13,12 @@ using Livet.Messaging.Windows;
 
 using ZangyoKeisan.Models;
 
+using System.Windows.Interactivity;
+using System.Windows.Controls;
+using System.Windows;
+using System.Windows.Input;
+using Microsoft.Expression.Interactivity;
+
 namespace ZangyoKeisan.ViewModels
 {
     public class DownloadWindowViewModel : ViewModel
@@ -59,16 +65,16 @@ namespace ZangyoKeisan.ViewModels
          * 自動的にUIDispatcher上での通知に変換されます。変更通知に際してUIDispatcherを操作する必要はありません。
          */
 
-        MospClient mospClient;
+        Model model;
         PropertyChangedEventListener statusListener;
 
         public void Initialize()
         {
-            mospClient = new MospClient();
-            statusListener = new PropertyChangedEventListener(mospClient);
-            statusListener.RegisterHandler(() => mospClient.DownloadStatus, (s, e) =>
+            model = Model.GetInstance();
+            statusListener = new PropertyChangedEventListener(model);
+            statusListener.RegisterHandler(() => model.DownloadStatus, (s, e) =>
             {
-                DownloadStatus = mospClient.DownloadStatus;
+                DownloadStatus = model.DownloadStatus;
             });
 
             TargetYears = new ObservableSynchronizedCollection<string>()
@@ -95,19 +101,17 @@ namespace ZangyoKeisan.ViewModels
         }
 
 
-        #region DownloadCommand
-        /// <summary>
-        /// ダウンロードボタン
-        /// </summary>
-        private ListenerCommand<string> _DownloadCommand;
 
-        public ListenerCommand<string> DownloadCommand
+        #region DownloadCommand
+        private ViewModelCommand _DownloadCommand;
+
+        public ViewModelCommand DownloadCommand
         {
             get
             {
                 if (_DownloadCommand == null)
                 {
-                    _DownloadCommand = new ListenerCommand<string>(Download, CanDownload);
+                    _DownloadCommand = new ViewModelCommand(Download, CanDownload);
                 }
                 return _DownloadCommand;
             }
@@ -115,22 +119,29 @@ namespace ZangyoKeisan.ViewModels
 
         public bool CanDownload()
         {
-            if (Id != "")
+            // 必要な項目に入力されている場合のみ押下できる
+            if (Id != null && Password != null && SelectedYear != null && SelectedMonth != null)
             {
                 return true;
             }
-
-            return false;
+            else
+            {
+                return false;
+            }
         }
 
-        public async void Download(string parameter)
+        public async void Download()
         {
-            Console.WriteLine("Downloadボタンが押下されました");
-            await mospClient.downloadExcel(Id, Password, SelectedYear, SelectedMonth);
+            string kintaiboFilePath = await model.downloadExcel(Id, Password, SelectedYear, SelectedMonth);
+
+            // ダウンロードに成功した場合
+            if (kintaiboFilePath != "")
+            {
+                // ダウンロード画面を閉じる
+                Messenger.Raise(new WindowActionMessage(WindowAction.Close, "CloseWindow"));
+            }
         }
         #endregion
-
-
 
         #region Id変更通知プロパティ
         private string _Id;
@@ -163,6 +174,8 @@ namespace ZangyoKeisan.ViewModels
                     return;
                 _Password = value;
                 RaisePropertyChanged();
+
+                DownloadCommand.RaiseCanExecuteChanged();
             }
         }
         #endregion
@@ -181,6 +194,8 @@ namespace ZangyoKeisan.ViewModels
                     return;
                 _DownloadStatus = value;
                 RaisePropertyChanged();
+
+                DownloadCommand.RaiseCanExecuteChanged();
             }
         }
         #endregion
@@ -217,8 +232,9 @@ namespace ZangyoKeisan.ViewModels
                 if (_SelectedYear == value)
                     return;
                 _SelectedYear = value;
-                Console.WriteLine(value + "年が選択されました");
                 RaisePropertyChanged();
+
+                DownloadCommand.RaiseCanExecuteChanged();
             }
         }
         #endregion
@@ -255,13 +271,10 @@ namespace ZangyoKeisan.ViewModels
                     return;
                 _SelectedMonth = value;
                 RaisePropertyChanged();
+
+                DownloadCommand.RaiseCanExecuteChanged();
             }
         }
         #endregion
-
-
-
-
-
     }
 }

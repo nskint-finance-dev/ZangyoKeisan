@@ -6,7 +6,9 @@
         xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
         xmlns:v="clr-namespace:ZangyoKeisan.Views"
         xmlns:vm="clr-namespace:ZangyoKeisan.ViewModels"
-        Title="勤怠簿ダウンロード" Height="250" Width="525">
+        Title="勤怠簿ダウンロード" Height="250" Width="525"
+        ResizeMode="NoResize"
+        FocusManager.FocusedElement="{Binding ElementName=Id}">
 
     <Window.DataContext>
         <vm:DownloadWindowViewModel/>
@@ -28,11 +30,16 @@
             <l:DataContextDisposeAction/>
         </i:EventTrigger>
 
+        <!--Windowを閉じる-->
+        <l:InteractionMessageTrigger MessageKey="CloseWindow" Messenger="{Binding Messenger}">
+            <l:WindowInteractionMessageAction InvokeActionOnlyWhenWindowIsActive="False" />
+        </l:InteractionMessageTrigger>
+
         <!--WindowのCloseキャンセル処理に対応する場合は、WindowCloseCancelBehaviorの使用を検討してください-->
 
     </i:Interaction.Triggers>
 
-    <Grid VerticalAlignment="Stretch">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition />
@@ -52,16 +59,17 @@
         </Label>
 
         <!-- ID -->
-        <Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right">
+        <Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right"  Margin="0, 5, 0, 5">
             ID：
         </Label>
-        <TextBox Name="Id" Text="{Binding Id, Mode=TwoWay}" Width="200" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" />
+        <TextBox Name="Id" Text="{Binding Id, Mode=TwoWay}" Width="200" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" Margin="0, 5, 0, 5" />
+
         
         <!-- パスワード -->
-        <Label Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right">
+        <Label Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right"  Margin="0, 5, 0, 5">
             パスワード：
         </Label>
-        <PasswordBox Name="Password" Width="200" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left">
+        <PasswordBox Name="Password" Width="200" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left"  Margin="0, 5, 0, 5">
             <!-- PasswordBoxの入力値はセキュリティ上の理由により取得方法が異なる -->
             <i:Interaction.Behaviors>
                 <l:PasswordBoxBindingSupportBehavior Password="{Binding Password}" />
@@ -69,20 +77,20 @@
         </PasswordBox>
 
         <!-- ダウンロード対象年月 -->
-        <Label Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right">
+        <Label Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center">
             対象年月：
         </Label>
         <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="1">
-            <ComboBox Width="70" Name="Year" ItemsSource="{Binding TargetYears}" SelectedItem="{Binding SelectedYear}" />
-            <Label Content="年" />
-            <ComboBox Width="50" Name="Month" ItemsSource="{Binding TargetMonthes}" SelectedItem="{Binding  SelectedMonth}" />
-            <Label Content="月" />
+            <ComboBox Width="70" Name="Year" ItemsSource="{Binding TargetYears}" SelectedItem="{Binding SelectedYear}"  Margin="0, 5, 0, 5" />
+            <Label Content="年" VerticalAlignment="Center"/>
+            <ComboBox Width="50" Name="Month" ItemsSource="{Binding TargetMonthes}" SelectedItem="{Binding  SelectedMonth}"  Margin="0, 5, 0, 5" />
+            <Label Content="月" VerticalAlignment="Center" />
         </StackPanel>
         
         <!-- ステータス -->
-        <Label Content="{Binding DownloadStatus}" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" />
+        <Label Content="{Binding DownloadStatus}" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center"/>
 
         <!-- ダウンロードボタン -->
-        <Button Content="ダウンロード" Height="15" Width="100" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Command="{Binding DownloadCommand}" />
+        <Button Content="ダウンロード" Height="20" Width="100" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Command="{Binding DownloadCommand}" />
     </Grid>
 </Window>
