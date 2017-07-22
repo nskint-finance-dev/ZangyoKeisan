@@ -7,7 +7,8 @@
         xmlns:v="clr-namespace:ZangyoKeisan.Views"
         xmlns:vm="clr-namespace:ZangyoKeisan.ViewModels"
         xmlns:m="clr-namespace:ZangyoKeisan.Models"
-        Title="残業時間計算" Height="350" Width="525">
+        Title="残業時間計算" Height="350" Width="525"
+        ResizeMode="NoResize">
 
     <Window.DataContext>
         <vm:MainWindowViewModel/>
@@ -15,9 +16,9 @@
 
     <i:Interaction.Triggers>
 
-    	<!--Viewに特別な要件が存在しない限りは、トリガーやアクションの自作にこだわらず積極的にコードビハインドを使いましょう -->
-    	<!--Viewのコードビハインドは、基本的にView内で完結するロジックとViewModelからのイベントの受信(専用リスナを使用する)に限るとトラブルが少なくなります -->
-    	<!--Livet1.1からはコードビハインドでViewModelのイベントを受信するためのWeakEventLisnterサポートが追加されています -->
+        <!--Viewに特別な要件が存在しない限りは、トリガーやアクションの自作にこだわらず積極的にコードビハインドを使いましょう -->
+        <!--Viewのコードビハインドは、基本的にView内で完結するロジックとViewModelからのイベントの受信(専用リスナを使用する)に限るとトラブルが少なくなります -->
+        <!--Livet1.1からはコードビハインドでViewModelのイベントを受信するためのWeakEventLisnterサポートが追加されています -->
 
         <!--WindowのContentRenderedイベントのタイミングでViewModelのInitializeメソッドが呼ばれます-->
         <i:EventTrigger EventName="ContentRendered">
@@ -43,9 +44,11 @@
             <v:ZangyoHourConverter x:Key="ZangyoHourConverter" />
             <v:ZangyoMinuteConverter x:Key="ZangyoMinuteConverter" />
             <v:ZangyoAlertConverter x:Key="ZangyoAlertConverter" />
+            <BooleanToVisibilityConverter x:Key="BoolToVisiblity" />
+            <v:BooleanToVisibilityReverseConverter x:Key="BoolToVisiblityReverse" />
+            <v:KintaiListNameConverter x:Key="KintaiListNameConverter" />
         </ResourceDictionary>
     </Window.Resources>
-
 
     <Grid>
         <Grid.RowDefinitions>
@@ -59,41 +62,89 @@
         </Grid.ColumnDefinitions>
         <!--　メニューバー　-->
         <Menu Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+            <MenuItem Header="勤怠簿(_K)">
+                <MenuItem IsCheckable="False" Header="開く(_O)" Command="{Binding LoadExcelCommand}" />
+                <MenuItem IsCheckable="False" Header="ダウンロード(_D)" Click="DownloadButton_Click" />
+            </MenuItem>
             <MenuItem Header="ヘルプ(_H)">
                 <MenuItem IsCheckable="False" Header="ヘルプ" Click="MenuItem_Click"/>
             </MenuItem>
         </Menu>
         <!-- ヘッダ -->
         <Label Content="残業時間計算" FontSize="23" Padding="10,0,0,20" Grid.Row="1" Grid.Column="0" VerticalAlignment="Bottom" />
-            <Button x:Name="button1" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="140" Height="40" Margin="0,0,10,10" Command="{Binding LoadExcelCommand}" Grid.Row="1" Grid.Column="1">
-                <StackPanel Orientation="Horizontal">
-                    <Image Source="{StaticResource ExcelIcon}" VerticalAlignment="Center" Height="25" Width="25"/>
-                    <Label Content="勤怠簿読み込み" VerticalAlignment="Center" FontSize="14" />
+
+        <!-- メイン表示エリア -->
+        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <!-- 残業時間表示エリア -->
+            <Grid Background="White" Grid.Row="0" Grid.Column="0" Visibility="{Binding IsDisplayReady, Converter={StaticResource BoolToVisiblity}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="180" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <!-- 残業時間一覧 -->
+                <Label Content="{Binding KintaiData.name, Converter={StaticResource KintaiListNameConverter}}" FontSize="19" Grid.Row="0" Grid.Column="0" Margin="30, 10, 0, 0" />
+                <StackPanel Orientation="Vertical" Grid.Row="1" Grid.Column="0" Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Hidden">
+                    <Label Content="2017" FontSize="30" VerticalAlignment="Bottom" />
+                    <Border BorderBrush="Black" BorderThickness="0, 1, 0, 0" Margin="10, 0, 10, 0">
+                        <Label Content="03" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Top" />
+                    </Border>
                 </StackPanel>
-            </Button>
-        <Button Grid.Row="1" Grid.Column="1" Height="40" Width="110" HorizontalAlignment="Left" Click="DownloadButton_Click" Margin="30, 0, 0, 0">
-            <StackPanel Orientation="Horizontal">
-                <Image Source="{StaticResource DownloadIcon}" VerticalAlignment="Center" Height="25" Width="25" />
-                <Label Content="ダウンロード" VerticalAlignment="Center" FontSize="14" />
-            </StackPanel>
-        </Button>
-        <!-- 残業時間一覧 -->
-        <ListBox ItemsSource="{Binding KintaiList}" VerticalContentAlignment="Stretch" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
-            <ListBox.ItemTemplate>
-                <DataTemplate DataType="{x:Type m:Kintai}">
-                    <StackPanel Orientation="Horizontal" Margin="10, 0,0,0">
-                        <Image Source="{StaticResource UserIcon}" Height="30" Width="30" />
-                        <Label Content="{Binding name}" FontSize="30" />
-                        <Image Source="{StaticResource WarnIcon}" Width="20" Height="20" Margin="25, 0,0,0" Visibility="{Binding zangyo, Converter={StaticResource ZangyoAlertConverter}}" />
-                        <StackPanel Orientation="Horizontal" Margin="50, 0,0,0">
-                            <Label Content="{Binding zangyo, Converter={StaticResource ZangyoHourConverter}}" FontSize="30" />
-                            <Label Content="h" FontSize="20" VerticalAlignment="Bottom" />
-                            <Label Content="{Binding zangyo, Converter={StaticResource ZangyoMinuteConverter}}" FontSize="30" />
-                            <Label Content="m" FontSize="20" VerticalAlignment="Bottom" />
+                <ContentControl Content="{Binding KintaiData}" Grid.Row="1" Grid.Column="1" Grid.RowSpan="2">
+                    <ContentControl.ContentTemplate>
+                        <DataTemplate>
+                            <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                                <TextBlock Text="{Binding zangyo, Converter={StaticResource ZangyoHourConverter}}" FontSize="120" FontWeight="Bold" VerticalAlignment="Center" />
+                                <TextBlock Text="h" FontSize="28" VerticalAlignment="Bottom" Margin="5, 0" />
+                                <TextBlock Text="{Binding zangyo, Converter={StaticResource ZangyoMinuteConverter}}" FontSize="80" VerticalAlignment="Bottom" Margin="10, -15" />
+                                <TextBlock Text="m" FontSize="25" VerticalAlignment="Bottom" Margin="10, 0, 0, 0" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ContentControl.ContentTemplate>
+                </ContentControl>
+                <!--
+                <Label Content="前月の勤怠簿を取得できていないため、残業時間は正確でない可能性があります。" Margin="30, 10, 0, 0" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" />
+                -->
+            </Grid>
+
+            <!-- 初期表示エリア -->
+            <Grid Grid.Row="0" Grid.Column="0" Background="White" Visibility="{Binding IsDisplayReady, Converter={StaticResource BoolToVisiblityReverse}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <Label Content="勤怠簿をダウンロードするか開いてください" FontSize="16" HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Grid.Row="0" Grid.Column="0" Margin="0, 0, 0, 20" />
+                <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Center">
+                    <Button x:Name="button1" VerticalAlignment="Bottom" Width="140" Height="40" Command="{Binding LoadExcelCommand}" Margin="0, 0, 30, 0">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="{StaticResource ExcelIcon}" VerticalAlignment="Center" Height="25" Width="25"/>
+                            <Label Content="勤怠簿読み込み" VerticalAlignment="Center" FontSize="14" />
                         </StackPanel>
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+                    </Button>
+                    <Button Height="40" Width="110" Click="DownloadButton_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="{StaticResource DownloadIcon}" VerticalAlignment="Center" Height="25" Width="25" />
+                            <Label Content="ダウンロード" VerticalAlignment="Center" FontSize="14" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Grid>
     </Grid>
 </Window>
