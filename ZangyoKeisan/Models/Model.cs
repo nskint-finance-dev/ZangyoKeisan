@@ -53,6 +53,25 @@ namespace ZangyoKeisan.Models
         #endregion
 
 
+
+        #region KintaiData変更通知プロパティ
+        private Kintai _KintaiData;
+
+        public Kintai KintaiData
+        {
+            get
+            { return _KintaiData; }
+            set
+            { 
+                if (_KintaiData == value)
+                    return;
+                _KintaiData = value;
+                RaisePropertyChanged();
+            }
+        }
+        #endregion
+
+
         MospClient mospClient;
 
         private static Model _singleInstance = new Model();
@@ -68,6 +87,7 @@ namespace ZangyoKeisan.Models
         {
             KintaiList = new ObservableSynchronizedCollection<Kintai>();
             mospClient = new MospClient();
+            KintaiData = new Kintai();
 
             _Progress = new Progress<ProgressInfo>(e =>
             {
@@ -93,17 +113,13 @@ namespace ZangyoKeisan.Models
                 // エクセル勤怠簿のデータをオブジェクトに変換
                 ObservableSynchronizedCollection<Kintai> kintaiList = parseExceltoDataObject(workBook);
 
-                KintaiList.Clear();
-
-                foreach (var item in kintaiList)
-                {
-                    // Add で追加しないと変更が反映されない
-                    KintaiList.Add(item);
-                }
+                KintaiList = kintaiList;
+                RaisePropertyChanged(nameof(KintaiList));
 
                 foreach (var kintai in KintaiList)
                 {
                     kintai.zangyo = calclateZangyo(kintai);
+                    KintaiData = kintai;
                 }
             }
             catch (System.IO.FileNotFoundException ex)

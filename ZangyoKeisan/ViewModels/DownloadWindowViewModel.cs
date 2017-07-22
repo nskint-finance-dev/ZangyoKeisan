@@ -261,6 +261,9 @@ namespace ZangyoKeisan.ViewModels
         #region SelectedMonth変更通知プロパティ
         private string _SelectedMonth;
 
+        /// <summary>
+        /// ダウンロード対象の月
+        /// </summary>
         public string SelectedMonth
         {
             get
@@ -276,5 +279,6 @@ namespace ZangyoKeisan.ViewModels
             }
         }
         #endregion
+
     }
 }

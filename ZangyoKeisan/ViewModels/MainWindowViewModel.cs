@@ -62,15 +62,21 @@ namespace ZangyoKeisan.ViewModels
          */
 
         Model model;
-        CollectionChangedEventListener listener;
+        PropertyChangedEventListener kintaiDataListener;
 
         public void Initialize()
         {
             model = Model.GetInstance();
-            listener = new CollectionChangedEventListener(model.KintaiList);
-            listener.RegisterHandler((s, e) =>
-            {
-                KintaiList = model.KintaiList;
+
+            // 初期表示時は、メイン画面を表示するためのデータがそろっていない
+            IsDisplayReady = false;
+
+            // 勤怠記録を取得できたら表示する
+            kintaiDataListener = new PropertyChangedEventListener(model);
+            kintaiDataListener.RegisterHandler(
+                () => model.KintaiData, (_, __) => {
+                    KintaiData = model.KintaiData;
+                    IsDisplayReady = true;
             });
         }
 
@@ -126,5 +132,47 @@ namespace ZangyoKeisan.ViewModels
         {
             model.loadKintaiFromExcel(kintaiboPath);
         }
+
+        #region IsDisplayReady変更通知プロパティ
+        private bool _IsDisplayReady;
+
+        /// <summary>
+        /// メイン画面を表示する準備が整っているか（trueなら整っている）
+        /// </summary>
+        public bool IsDisplayReady
+        {
+            get
+            { return _IsDisplayReady; }
+            set
+            {
+                if (_IsDisplayReady == value)
+                    return;
+                _IsDisplayReady = value;
+                RaisePropertyChanged();
+            }
+        }
+        #endregion
+
+
+        #region KintaiData変更通知プロパティ
+        private Kintai _KintaiData;
+
+        /// <summary>
+        /// 勤怠記録（個人）
+        /// </summary>
+        public Kintai KintaiData
+        {
+            get
+            { return _KintaiData; }
+            set
+            { 
+                if (_KintaiData == value)
+                    return;
+                _KintaiData = value;
+                RaisePropertyChanged();
+            }
+        }
+        #endregion
+
     }
 }

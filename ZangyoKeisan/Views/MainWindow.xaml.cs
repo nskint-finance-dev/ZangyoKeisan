@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Livet;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -12,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ZangyoKeisan.Models;
 
 namespace ZangyoKeisan.Views
 {
@@ -126,6 +128,45 @@ namespace ZangyoKeisan.Views
             {
                 return Visibility.Hidden;
             }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
+    /// BooleanToVisibilityConverterの逆で、true→Hidden, false→Visibleを返す
+    /// </summary>
+    public class BooleanToVisibilityReverseConverter : IValueConverter
+    {
+        public object Convert(object value, Type type, object parameter, System.Globalization.CultureInfo cultureInfo)
+        {
+            if ((bool)value)
+            {
+                return Visibility.Hidden;
+            }
+            else
+            {
+                return Visibility.Visible;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
+    /// 氏名表示コンバーター （氏名+「さん」を返す）
+    /// </summary>
+    public class KintaiListNameConverter : IValueConverter
+    {
+        public object Convert(object value, Type type, object parameter, System.Globalization.CultureInfo cultureInfo)
+        {
+            return value + " さん";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
